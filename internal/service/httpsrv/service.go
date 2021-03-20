@@ -64,7 +64,7 @@ func (s *Service) Start(a *gaarx.App) error {
 		auth.POST("/login", h.Auth)
 		auth.OPTIONS("/login", echo.MethodNotAllowedHandler)
 
-		auth.POST("/checkToken", h.CheckToken, authMw...)
+		auth.POST("/checkToken", h.CheckToken)
 		auth.OPTIONS("/checkToken", echo.MethodNotAllowedHandler)
 	}
 
@@ -76,6 +76,12 @@ func (s *Service) Start(a *gaarx.App) error {
 		user.PUT("/:id", h.UpdateUser)
 		user.DELETE("/:id", h.DeleteUser)
 		user.OPTIONS("/:id", echo.MethodNotAllowedHandler)
+	}
+
+	search := e.Group("/search", authMw...)
+	{
+		search.POST("/user", h.SearchUser)
+		search.OPTIONS("/user", echo.MethodNotAllowedHandler)
 	}
 
 	return e.Start(":" + s.app.Config().(*config.Config).Api.Port)
