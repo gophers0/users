@@ -7,7 +7,7 @@ const (
 
 type User struct {
 	Model
-	Login    string `json:"login"`
+	Login    string `json:"login" gorm:"index"`
 	Password string `json:"-"`
 	Role     string `json:"role"`
 }

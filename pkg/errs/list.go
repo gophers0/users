@@ -79,4 +79,6 @@ var (
 	InvalidToken                    = newCodeError(200001, "Некорректный токен авторизации", "InvalidToken", http.StatusForbidden)
 	UserAlreadyExists               = newCodeError(200002, "Юзер уже существует", "UserAlreadyExists", http.StatusBadRequest)
 	AuthorizationInvalidCredentials = newCodeError(200003, "Неверный логин-пароль", "AuthorizationInvalidCredentials", http.StatusBadRequest)
+	AuthorizationHeaderMissing      = newCodeError(200004, "Не передан авторизационный заголовок", "AuthorizationHeaderMissing", http.StatusUnauthorized)
+	InvalidAuthorizationHeader      = newCodeError(200005, "Некорректный заголовок авторизации", "InvalidAuthorizationHeader", http.StatusUnauthorized)
 )

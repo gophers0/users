@@ -50,13 +50,23 @@ func (s *Service) Start(a *gaarx.App) error {
 		mw.Error(middlewares.ErrorHandler()),
 		mw.Recover(),
 	}
-	adminMw := append(commonMw, mw.AdminOnly())
+	authMw := append(commonMw, mw.Auth())
+	adminMw := append(authMw, mw.AdminOnly())
 
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	}, commonMw...)
 
 	h := handlers.New(a)
+
+	auth := e.Group("/auth", commonMw...)
+	{
+		auth.POST("/login", h.Auth)
+		auth.OPTIONS("/login", echo.MethodNotAllowedHandler)
+
+		auth.POST("/checkToken", h.CheckToken, authMw...)
+		auth.OPTIONS("/checkToken", echo.MethodNotAllowedHandler)
+	}
 
 	user := e.Group("/user", adminMw...)
 	{

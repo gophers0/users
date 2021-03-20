@@ -10,7 +10,7 @@ import (
 func (r *Repo) FindUserByLogin(login string) (*model.User, error) {
 	user := &model.User{}
 	if err := r.DB.Where("login = ?", login).First(user).Error; err != nil {
-		return nil, errs.NewStack(err)
+		return nil, err
 	}
 
 	return user, nil
@@ -29,21 +29,20 @@ func (r *Repo) CreateUser(login, password, role string) (*model.User, error) {
 		if err := r.DB.Create(user).Error; err != nil {
 			return nil, errs.NewStack(err)
 		}
+		return user, nil
 	}
 	return nil, errs.NewStack(errs.UserAlreadyExists)
 }
 
 func (r *Repo) UpdateUser(userId uint, login, password, role string) (*model.User, error) {
-	user := &model.User{
-		Login:    login,
-		Password: password,
-		Role:     role,
-	}
-	count := 0
-	if err := r.DB.Model(user).Where(userId).Count(&count).Error; err != nil {
+	user := &model.User{}
+	if err := r.DB.Model(user).Where("id = ?", userId).First(user).Error; err != nil {
 		return nil, errs.NewStack(err)
 	}
-	if err := r.DB.Where(userId).UpdateColumns(user).Error; err != nil {
+	user.Login = login
+	user.Password = password
+	user.Role = role
+	if err := r.DB.Save(user).Error; err != nil {
 		return nil, errs.NewStack(err)
 	}
 

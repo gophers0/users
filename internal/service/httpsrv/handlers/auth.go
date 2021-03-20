@@ -9,7 +9,7 @@ import (
 )
 
 func (h *Handlers) Auth(c echo.Context) error {
-	req := transport.LoginRequest{}
+	req := &transport.LoginRequest{}
 	err := transport.BindAndValidate(c, req)
 	if err != nil {
 		return errs.NewStack(errs.RequestValidationError.AddInfoErrMessage(err))
@@ -25,7 +25,7 @@ func (h *Handlers) Auth(c echo.Context) error {
 		return errs.NewStack(errs.AuthorizationInvalidCredentials)
 	}
 
-	token, err := h.getDB().GetSessionTokenForUser(user.ID)
+	session, err := h.getDB().GetSessionForUser(user.ID)
 	if err != nil {
 		return err
 	}
@@ -33,7 +33,7 @@ func (h *Handlers) Auth(c echo.Context) error {
 	return c.JSON(http.StatusOK, transport.LoginResponse{
 		Code:  0,
 		User:  user,
-		Token: token,
+		Token: session.Token,
 	})
 }
 

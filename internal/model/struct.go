@@ -11,4 +11,5 @@ type Model struct {
 
 var ModelsList = []interface{}{
 	&User{},
+	&Session{},
 }

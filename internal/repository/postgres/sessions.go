@@ -3,21 +3,33 @@ package postgres
 import (
 	"github.com/gophers0/users/internal/model"
 	"github.com/gophers0/users/pkg/errs"
+	"github.com/gophers0/users/pkg/hexdigest"
 )
 
-func (r *Repo) GetSessionTokenForUser(userId uint) (string, error) {
+func (r *Repo) GetSessionForUser(userId uint) (*model.Session, error) {
 	user := &model.User{}
 	if err := r.DB.First(user, userId).Error; err != nil {
-		return "", errs.NewStack(err)
+		return nil, errs.NewStack(err)
 	}
 
-	session := &model.Session{}
-	err := r.DB.FirstOrCreate(session, "user_id = ?", userId).Error
+	session := &model.Session{
+		User: *user,
+	}
+	newToken, err := hexdigest.HexDigest()
 	if err != nil {
-		return "", errs.NewStack(err)
+		return nil, errs.NewStack(err)
 	}
 
-	return session.Token, nil
+	if err := r.DB.Set("gorm:association_autoupdate", false).
+		Set("gorm:association_autocreate", false).
+		Preload("User").
+		Where("user_id = ?", userId).
+		Attrs(model.Session{Token: newToken}).
+		FirstOrCreate(session).Error; err != nil {
+		return nil, errs.NewStack(err)
+	}
+
+	return session, nil
 }
 
 func (r *Repo) CheckSessionTokenForUser(token string, userId uint) (*model.Session, error) {
