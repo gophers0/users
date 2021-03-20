@@ -3,6 +3,7 @@ package postgres
 import (
 	"fmt"
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 	gaarx "github.com/zergu1ar/Gaarx"
 )
 

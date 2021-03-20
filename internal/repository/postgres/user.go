@@ -16,30 +16,6 @@ func (r *Repo) FindUserByLogin(login string) (*model.User, error) {
 	return user, nil
 }
 
-func (r *Repo) GetSessionTokenForUser(userId uint) (string, error) {
-	user := &model.User{}
-	if err := r.DB.First(user, userId).Error; err != nil {
-		return "", errs.NewStack(err)
-	}
-
-	session := &model.Session{}
-	err := r.DB.FirstOrCreate(session, "user_id = ?", userId).Error
-	if err != nil {
-		return "", errs.NewStack(err)
-	}
-
-	return session.Token, nil
-}
-
-func (r *Repo) CheckSessionTokenForUser(token string, userId uint) (*model.Session, error) {
-	session := &model.Session{}
-	err := r.DB.Preload("User").Where("token = ? AND user_id = ?", token, userId).First(session).Error
-	if err != nil {
-		return nil, errs.NewStack(err)
-	}
-	return session, err
-}
-
 func (r *Repo) CreateUser(login, password, role string) (*model.User, error) {
 	_, err := r.FindUserByLogin(login)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -55,4 +31,25 @@ func (r *Repo) CreateUser(login, password, role string) (*model.User, error) {
 		}
 	}
 	return nil, errs.NewStack(errs.UserAlreadyExists)
+}
+
+func (r *Repo) UpdateUser(userId uint, login, password, role string) (*model.User, error) {
+	user := &model.User{
+		Login:    login,
+		Password: password,
+		Role:     role,
+	}
+	count := 0
+	if err := r.DB.Model(user).Where(userId).Count(&count).Error; err != nil {
+		return nil, errs.NewStack(err)
+	}
+	if err := r.DB.Where(userId).UpdateColumns(user).Error; err != nil {
+		return nil, errs.NewStack(err)
+	}
+
+	return user, nil
+}
+
+func (r *Repo) DeleteUser(userId uint) error {
+	return errs.NewStack(r.DB.Where("id = ?", userId).Delete(&model.User{}).Error)
 }
