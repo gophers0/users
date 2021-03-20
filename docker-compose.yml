@@ -13,6 +13,19 @@ services:
       - dev
     ports:
       - 15432:5432
+  app:
+    build:
+      context: .
+      dockerfile: docker/users/Dockerfile
+    volumes:
+      - "../:/go/src/users"
+    ports:
+      - "8080:3000"
+    tty: true
+    depends_on:
+      - db
+    networks:
+      - dev
 networks:
   dev:
 volumes:
