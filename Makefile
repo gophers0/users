@@ -3,3 +3,6 @@ docker:
 
 docker-down:
 	docker-compose down
+
+deploy:
+	rsync -avzhe ssh . hack:/srv/users/

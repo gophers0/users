@@ -22,7 +22,7 @@ func (r *Repo) SearchUsers(login string, isAdmin bool, limit, offset int) ([]*mo
 	}
 
 	if limit == 0 || limit > 99 {
-		limit = 10
+		limit = 99
 	}
 	if offset < 0 {
 		offset = 0
